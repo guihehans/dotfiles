@@ -1,91 +1,339 @@
-#!/bin/zsh
-
-# Do not want background jobs to be at a lower priority
-unsetopt BG_NICE
-
-# WSL specific things
-if grep --quiet microsoft /proc/version 2>/dev/null; then
-  # Set Windows display for WSL
-  export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}')':0.0'
-  export LIBGL_ALWAYS_INDIRECT=1
-fi
-
-# Custom aliases
-[ -f ~/.aliases.zsh ] && source ~/.aliases.zsh
-
-# All zsh plugins (Generated via Antibody)
-[ -f ~/.zsh_plugins.zsh ] && source ~/.zsh_plugins.zsh
-
-# Secret env
-[ -f ~/.env ] && source ~/.env
-
-# Original PATH from genie - Temporary fix, see https://github.com/arkane-systems/genie/issues/201
-[ -f /run/genie.path ] && export PATH=$PATH:$(cat /run/genie.path)
-
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block, everything else may go below.
+# confirmations, etc.) must go above this block; everything else may go below.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Preferred editor for local and remote sessions
-export EDITOR='vim'
+# Antigen: https://github.com/zsh-users/antigen
+ANTIGEN="$HOME/.local/bin/antigen.zsh"
 
-# screen
+# Install antigen.zsh if not exist
+if [ ! -f "$ANTIGEN" ]; then
+	echo "Installing antigen ..."
+	[ ! -d "$HOME/.local" ] && mkdir -p "$HOME/.local" 2> /dev/null
+	[ ! -d "$HOME/.local/bin" ] && mkdir -p "$HOME/.local/bin" 2> /dev/null
+	# [ ! -f "$HOME/.z" ] && touch "$HOME/.z"
+	URL="http://git.io/antigen"
+	TMPFILE="/tmp/antigen.zsh"
+	if [ -x "$(which curl)" ]; then
+		curl -L "$URL" -o "$TMPFILE" 
+	elif [ -x "$(which wget)" ]; then
+		wget "$URL" -O "$TMPFILE" 
+	else
+		echo "ERROR: please install curl or wget before installation !!"
+		exit
+	fi
+	if [ ! $? -eq 0 ]; then
+		echo ""
+		echo "ERROR: downloading antigen.zsh ($URL) failed !!"
+		exit
+	fi;
+	echo "move $TMPFILE to $ANTIGEN"
+	mv "$TMPFILE" "$ANTIGEN"
+fi
+
+# Load local bash/zsh compatible settings
+INIT_SH_NOFUN=1
+INIT_SH_NOLOG=1
+DISABLE_Z_PLUGIN=1
+[ -f "$HOME/.local/etc/init.sh" ] && source "$HOME/.local/etc/init.sh"
+
+# exit for non-interactive shell
+[[ $- != *i* ]] && return
+
+# WSL (aka Bash for Windows) doesn't work well with BG_NICE
+[ -d "/mnt/c" ] && [[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE
+
+# Initialize command prompt
+export PS1="%n@%m:%~%# "
+
+# Initialize antigen
+source "$ANTIGEN"
+
+# Setup dir stack
+DIRSTACKSIZE=10
+setopt autopushd pushdminus pushdsilent pushdtohome pushdignoredups cdablevars
+alias d='dirs -v | head -10'
+
+# Disable correction
+unsetopt correct_all
+unsetopt correct
+DISABLE_CORRECTION="true" 
+
+# Enable 256 color to make auto-suggestions look nice
+export TERM="xterm-256color"
+
+ZSH_AUTOSUGGEST_USE_ASYNC=1
+
+# Declare modules
+zstyle ':prezto:*:*' color 'yes'
+zstyle ':prezto:module:editor' key-bindings 'emacs'
+zstyle ':prezto:module:git:alias' skip 'yes'
+zstyle ':prezto:module:prompt' theme 'redhat'
+zstyle ':prezto:module:prompt' pwd-length 'short'
+zstyle ':prezto:module:terminal' auto-title 'yes'
+zstyle ':prezto:module:autosuggestions' color 'yes'
+zstyle ':prezto:module:python' autovenv 'yes'
+zstyle ':prezto:load' pmodule \
+	'environment' \
+	'editor' \
+	'history' \
+	'git' \
+	'utility' \
+	'completion' \
+	'history-substring-search' \
+	'autosuggestions' \
+	'prompt' \
+
+	# 'autosuggestions' \
+
+# Initialize prezto
+antigen use prezto
+
+
+# default bundles
+antigen bundle rupa/z z.sh
+antigen bundle Vifon/deer
+antigen bundle zdharma-continuum/fast-syntax-highlighting
+antigen theme romkatv/powerlevel10k
+# antigen bundle zsh-users/zsh-autosuggestions
+
+antigen bundle willghatch/zsh-cdr
+# antigen bundle zsh-users/zaw
+
+# check login shell
+if [[ -o login ]]; then
+	[ -f "$HOME/.local/etc/login.sh" ] && source "$HOME/.local/etc/login.sh"
+	[ -f "$HOME/.local/etc/login.zsh" ] && source "$HOME/.local/etc/login.zsh"
+fi
+
+# syntax color definition
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
+
+typeset -A ZSH_HIGHLIGHT_STYLES
+
+# ZSH_HIGHLIGHT_STYLES[command]=fg=white,bold
+# ZSH_HIGHLIGHT_STYLES[alias]='fg=magenta,bold'
+
+ZSH_HIGHLIGHT_STYLES[default]=none
+ZSH_HIGHLIGHT_STYLES[unknown-token]=fg=009
+ZSH_HIGHLIGHT_STYLES[reserved-word]=fg=009,standout
+ZSH_HIGHLIGHT_STYLES[alias]=fg=cyan,bold
+ZSH_HIGHLIGHT_STYLES[builtin]=fg=cyan,bold
+ZSH_HIGHLIGHT_STYLES[function]=fg=cyan,bold
+ZSH_HIGHLIGHT_STYLES[command]=fg=white,bold
+ZSH_HIGHLIGHT_STYLES[precommand]=fg=white,underline
+ZSH_HIGHLIGHT_STYLES[commandseparator]=none
+ZSH_HIGHLIGHT_STYLES[hashed-command]=fg=009
+ZSH_HIGHLIGHT_STYLES[path]=fg=214,underline
+ZSH_HIGHLIGHT_STYLES[globbing]=fg=063
+ZSH_HIGHLIGHT_STYLES[history-expansion]=fg=white,underline
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]=none
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]=none
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument]=none
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]=fg=063
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]=fg=063
+ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]=fg=009
+ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]=fg=009
+ZSH_HIGHLIGHT_STYLES[assign]=none
+
+# load local config
+[ -f "$HOME/.local/etc/config.zsh" ] && source "$HOME/.local/etc/config.zsh" 
+[ -f "$HOME/.local/etc/local.zsh" ] && source "$HOME/.local/etc/local.zsh"
+
+antigen apply
+
+# work around: fast syntax highlighting may crash zsh without this
+FAST_HIGHLIGHT[chroma-git]="chroma/-ogit.ch"
+
+# options
+unsetopt correct_all
+unsetopt share_history
+setopt prompt_subst
+unsetopt prompt_cr prompt_sp
+
+setopt BANG_HIST                 # Treat the '!' character specially during expansion.
+setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
+# setopt SHARE_HISTORY             # Share history between all sessions.
+setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first when trimming history.
+setopt HIST_IGNORE_DUPS          # Don't record an entry that was just recorded again.
+setopt HIST_IGNORE_ALL_DUPS      # Delete old recorded entry if new entry is a duplicate.
+setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
+setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space.
+setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
+setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
+setopt HIST_VERIFY # Don't execute immediately upon history expansion.
+
+# setup for deer
+autoload -U deer
+zle -N deer
+
+# default keymap
+bindkey -s '\ee' 'vim\n'
+bindkey '\eh' backward-char
+bindkey '\el' forward-char
+bindkey '\ej' down-line-or-history
+bindkey '\ek' up-line-or-history
+bindkey '\eH' backward-word
+bindkey '\eL' forward-word
+bindkey '\eJ' beginning-of-line
+bindkey '\eK' end-of-line
+
+bindkey -s '\eo' 'cd ..\n'
+bindkey -s '\e;' 'll\n'
+
+bindkey '\e[1;3D' backward-word
+bindkey '\e[1;3C' forward-word
+bindkey '\e[1;3A' beginning-of-line
+bindkey '\e[1;3B' end-of-line
+
+bindkey '\ev' deer
+bindkey -s '\eu' 'ranger_cd\n'
+bindkey -s '\eOS' 'vim '
+
+
+# source function.sh if it exists
+[ -f "$HOME/.local/etc/function.sh" ] && . "$HOME/.local/etc/function.sh"
+
+# Disable correction
+unsetopt correct_all
+unsetopt correct
+DISABLE_CORRECTION="true" 
+
+# completion detail
+zstyle ':completion:*:complete:-command-:*:*' ignored-patterns '*.pdf|*.exe|*.dll'
+zstyle ':completion:*:*sh:*:' tag-order files
+
+###### where orignial start  ####################################
+
+# If you come from bash you might have to change your $PATH.
+# export PATH=$HOME/bin:/usr/local/bin:$PATH
+
+# Path to your oh-my-zsh installation.
+export ZSH="/home/guihehans/.oh-my-zsh"
+
+# Set name of the theme to load --- if set to "random", it will
+# load a random theme each time oh-my-zsh is loaded, in which case,
+# to know which specific one was loaded, run: echo $RANDOM_THEME
+# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+# ZSH_THEME="powerlevel10k/powerlevel10k"
+
+# Set list of themes to pick from when loading at random
+# Setting this variable when ZSH_THEME=random will cause zsh to load
+# a theme from this variable instead of looking in $ZSH/themes/
+# If set to an empty array, this variable will have no effect.
+# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+
+# Uncomment the following line to use case-sensitive completion.
+# CASE_SENSITIVE="true"
+
+# Uncomment the following line to use hyphen-insensitive completion.
+# Case-sensitive completion must be off. _ and - will be interchangeable.
+# HYPHEN_INSENSITIVE="true"
+
+# Uncomment the following line to disable bi-weekly auto-update checks.
+# DISABLE_AUTO_UPDATE="true"
+
+# Uncomment the following line to automatically update without prompting.
+# DISABLE_UPDATE_PROMPT="true"
+
+# Uncomment the following line to change how often to auto-update (in days).
+# export UPDATE_ZSH_DAYS=13
+
+# Uncomment the following line if pasting URLs and other text is messed up.
+# DISABLE_MAGIC_FUNCTIONS="true"
+
+# Uncomment the following line to disable colors in ls.
+# DISABLE_LS_COLORS="true"
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment the following line to enable command auto-correction.
+# ENABLE_CORRECTION="true"
+
+# Uncomment the following line to display red dots whilst waiting for completion.
+# Caution: this setting can cause issues with multiline prompts (zsh 5.7.1 and newer seem to work)
+# See https://github.com/ohmyzsh/ohmyzsh/issues/5765
+# COMPLETION_WAITING_DOTS="true"
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# You can set one of the optional three formats:
+# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# or set a custom format using the strftime function format specifications,
+# see 'man strftime' for details.
+# HIST_STAMPS="mm/dd/yyyy"
+
+# Would you like to use another custom folder than $ZSH/custom?
+# ZSH_CUSTOM=/path/to/new-custom-folder
+
+# Which plugins would you like to load?
+# Standard plugins can be found in $ZSH/plugins/
+# Custom plugins may be added to $ZSH_CUSTOM/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+# Add wisely, as too many plugins slow down shell startup.
+plugins=(
+	omw
+)
+
+
+
+source $ZSH/oh-my-zsh.sh
+source <(kubectl completion zsh)
+
+# User configuration
+
+# export MANPATH="/usr/local/man:$MANPATH"
+
+# You may need to manually set your language environment
+# export LANG=en_US.UTF-8
+
+# Preferred editor for local and remote sessions
+# if [[ -n $SSH_CONNECTION ]]; then
+#   export EDITOR='vim'
+# else
+#   export EDITOR='mvim'
+# fi
+
+# Compilation flags
+# export ARCHFLAGS="-arch x86_64"
+
+# Set personal aliases, overriding those provided by oh-my-zsh libs,
+# plugins, and themes. Aliases can be placed here, though oh-my-zsh
+# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+# For a full list of active aliases, run `alias`.
+#
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"
+cd ~
+
+alias sz='source ~/.zshrc'     # Easily source your ~/.zshrc file.
+alias ls='pwd; ls --color'     # Alias 'ls' to: pwd + ls + color.
+
+alias kill='sudo kill'  # promote kill to sudo kill
+alias logmass="code ~/.omw/output/1.0.0-9999-SNAPSHOT/deploy/tomcat/platform-tomcat/logs/maas"
+alias mvnmass="cd $MAAS_HOME/itsma-x; mvn install -DskipTests=true -Pgenerate-sources --builder smart -T0.8C -nsu;"
+
+# WSL specific things
+if grep --quiet microsoft /proc/version 2>/dev/null; then
+  alias idea="(pkill -f 'java.*idea' || true) && screen -d -m /opt/idea/bin/idea.sh"
+  alias wslb="PowerShell.exe 'Start-Process PowerShell -Verb RunAs \"PowerShell -File \$env:USERPROFILE\\wsl2-bridge.ps1\"'"
+  alias dcs="sudo /etc/init.d/docker start"
+fi
+
+# Original PATH from genie - Temporary fix, see https://github.com/arkane-systems/genie/issues/201
+[ -f /run/genie.path ] && export PATH=$PATH:$(cat /run/genie.path)
+
+# source /usr/sbin/start-systemd-namespace
 export SCREENDIR=$HOME/.screen
 
-# Go
-export PATH=$PATH:/usr/local/go/bin
-export PATH=$PATH:$(go env GOPATH)/bin
-
-# Volta (node, npm)
-export VOLTA_HOME=$HOME/.volta
-export PATH=$VOLTA_HOME/bin:$PATH
-
-## History command configuration
-HISTSIZE=5000                 # How many lines of history to keep in memory
-HISTFILE=~/.zsh_history       # Where to save history to disk
-SAVEHIST=5000                 # Number of history entries to save to disk
-setopt extended_history       # record timestamp of command in HISTFILE
-setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE
-setopt hist_ignore_dups       # ignore duplicated commands history list
-setopt hist_ignore_space      # ignore commands that start with space
-setopt hist_verify            # show command with history expansion to user before running it
-setopt inc_append_history     # add commands to HISTFILE in order of execution
-setopt share_history          # share command history data
-
-# Custom dircolors, without useless green background on directories
-# dircolors | sed -E 's/(tw|ow)=[^:]+/\1=01;34/g'
-LS_COLORS='rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=01;34:ow=01;34:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:';
-export LS_COLORS
-
-# Show cwd when shell prompts for input.
-tabtitle_precmd() {
-   pwd=$(dirs) # Store full path as variable
-   cwd=${pwd##*/} # Extract current working dir only
-   printf "\033]0;%s\a" "$cwd" # Omit construct from $1 to show args
-}
-[[ -z $precmd_functions ]] && precmd_functions=()
-precmd_functions=($precmd_functions tabtitle_precmd)
-
-# Prepend command (w/o arguments) to cwd while waiting for command to complete.
-tabtitle_preexec() {
-   printf "\033]0;%s\a" "${1%% *} | $cwd" # Omit construct from $1 to show args
-}
-[[ -z $preexec_functions ]] && preexec_functions=()
-preexec_functions=($preexec_functions tabtitle_preexec)
-
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[ -f ~/.p10k.zsh ] && source ~/.p10k.zsh
-
-# Keybindings
-# Source: https://www.zsh.org/mla/users/2008/msg00794.html
-bindkey '\e[1~'   beginning-of-line  # Linux console
-bindkey '\e[H'    beginning-of-line  # xterm
-bindkey '\eOH'    beginning-of-line  # gnome-terminal
-bindkey '\e[2~'   overwrite-mode     # Linux console, xterm, gnome-terminal
-bindkey '\e[3~'   delete-char        # Linux console, xterm, gnome-terminal
-bindkey '\e[4~'   end-of-line        # Linux console
-bindkey '\e[F'    end-of-line        # xterm
-bindkey '\eOF'    end-of-line        # gnome-terminal
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
