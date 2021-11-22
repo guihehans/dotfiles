@@ -20,13 +20,7 @@ What's in this setup?
 - Systemd
 - zsh
 - git
-- Docker
-- Docker Compose
-- Node.js (using [Volta](https://volta.sh))
-  - node
-  - npm
-  - yarn
-- Go
+- Go 
 - IDE: IntelliJ IDEA, under WSL 2, used on Windows via VcXsrv
 - WSL Bridge: allow exposing WSL 2 ports on the network
 
@@ -117,8 +111,8 @@ Setup Git
 #!/bin/bash
 
 # Set username and email for next commands
-email="contact@alex-d.fr"
-username="Alex-D"
+email="guihehans@gmail.com"
+username="guihehans"
 gpgkeyid="8FA78E6580B1222A"
 
 # Configure Git
@@ -150,18 +144,13 @@ Setup zsh
 #!/bin/zsh
 
 # Clone the dotfiles repository
-mkdir -p ~/dev/dotfiles
-git clone git@github.com:Alex-D/dotfiles.git ~/dev/dotfiles
-
-# Install Antibody and generate .zsh_plugins.zsh
-curl -sfL git.io/antibody | sudo sh -s - -b /usr/local/bin
-antibody bundle < ~/dev/dotfiles/zsh_plugins > ~/.zsh_plugins.zsh
+mkdir -p ~/code/personal
+git clone git@github.com:guihehans/dotfiles.git ~/code/personal
 
 # Link custom dotfiles
-ln -sf ~/dev/dotfiles/.aliases.zsh ~/.aliases.zsh
-ln -sf ~/dev/dotfiles/.p10k.zsh ~/.p10k.zsh
-ln -sf ~/dev/dotfiles/.zshrc ~/.zshrc
-ln -sf ~/dev/dotfiles/.gitignore ~/.gitignore
+ln -sf ~/code/personal/.zshrc ~/.zshrc
+ln -sf ~/code/personal/.p10k.zsh ~/.p10k.zsh
+ln -sf ~/code/personal/.gitignore ~/.gitignore
 
 # Create .screen folder used by .zshrc
 mkdir ~/.screen && chmod 700 ~/.screen
@@ -192,83 +181,16 @@ echo \
   $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/wsl-transdebian.list > /dev/null
 
 # Install Systemd Genie
-sudo apt-get update
-sudo apt-get install -y systemd-genie
+sudo apt update
+sudo apt install -y systemd-genie
 
 # Mask some unwanted services
 sudo systemctl mask systemd-remount-fs.service
 sudo systemctl mask multipathd.socket
 
 # Install custom config
-sudo ln -sf ~/dev/dotfiles/genie.ini /etc/genie.ini
+sudo ln -sf ~/code/personal/genie.ini /etc/genie.ini
 ```
-
-
-Docker
-------
-
-### Setup Docker
-
-```shell script
-#!/bin/zsh
-
-# Add Docker to sources.list
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo \
-  "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# Install tools
-sudo apt update && sudo apt install -y \
-    docker-ce docker-ce-cli containerd.io
-
-# Add user to docker group
-sudo usermod -aG docker $USER
-```
-
-You can start Docker daemon via [Systemd](#systemd) or via `dcs` alias.
-
-
-Docker Compose
---------------
-
-```shell script
-#!/bin/zsh
-
-sudo curl -sL -o /usr/local/bin/docker-compose $(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep "browser_download_url.*$(uname -s)-$(uname -m)" | grep -v sha | cut -d: -f2,3 | tr -d \")
-sudo chmod +x /usr/local/bin/docker-compose
-```
-
-
-Node.js
--------
-
-```shell script
-#!/bin/zsh
-
-# Install Volta
-mkdir -p $VOLTA_HOME
-curl https://get.volta.sh | bash -s -- --skip-setup
-
-# Install node and package managers
-volta install node npm yarn
-```
-
-
-Go
----
-
-```shell script
-#!/bin/zsh
-
-goVersion=1.16.4
-curl -L "https://golang.org/dl/go${goVersion}.linux-amd64.tar.gz" > /tmp/go${goVersion}.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go
-sudo tar -C /usr/local -xzf /tmp/go${goVersion}.linux-amd64.tar.gz
-rm /tmp/go${goVersion}.linux-amd64.tar.gz
-```
-
-[See official documentation](https://golang.org/doc/install)
 
 
 IntelliJ IDEA
@@ -284,7 +206,7 @@ I run IntelliJ IDEA in WSL 2, and get its GUI on Windows via X Server (VcXsrv).
 windowsUserProfile=/mnt/c/Users/$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
 
 # Run VcXsrv at startup
-cp ~/dev/dotfiles/config.xlaunch "${windowsUserProfile}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
+cp ~/code/personal/config.xlaunch "${windowsUserProfile}/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
 ```
 
 ### Install IntelliJ IDEA
@@ -327,7 +249,7 @@ Setup Windows Terminal
 windowsUserProfile=/mnt/c/Users/$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
 
 # Copy Windows Terminal settings
-cp ~/dev/dotfiles/terminal-settings.json ${windowsUserProfile}/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json
+cp ~/code/personal/terminal-settings.json ${windowsUserProfile}/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json
 ```
 
 
@@ -344,7 +266,7 @@ To avoid doing than manually each time I start my computer, I've made the `wslb`
 windowsUserProfile=/mnt/c/Users/$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
 
 # Get the hacky network bridge script
-cp ~/dev/dotfiles/wsl2-bridge.ps1 ${windowsUserProfile}/wsl2-bridge.ps1
+cp ~/code/personal/wsl2-bridge.ps1 ${windowsUserProfile}/wsl2-bridge.ps1
 ```
 
 In order to allow `wsl2-bridge.ps1` script to run, you need to update your PowerShell execution policy.
@@ -376,25 +298,25 @@ Limit WSL 2 RAM consumption
 windowsUserProfile=/mnt/c/Users/$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
 
 # Avoid too much RAM consumption
-cp ~/dev/dotfiles/.wslconfig ${windowsUserProfile}/.wslconfig
+cp ~/code/personal/.wslconfig ${windowsUserProfile}/.wslconfig
 ```
 
 Note: You can adjust the RAM amount in `.wslconfig` file. Personally, I set it to 8 GB.
 
-
-Install kubectl
----------------
+Go
+---
 
 ```shell script
 #!/bin/zsh
 
-sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-sudo apt-get update
-sudo apt-get install -y kubectl
+goVersion=1.16.4
+curl -L "https://golang.org/dl/go${goVersion}.linux-amd64.tar.gz" > /tmp/go${goVersion}.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf /tmp/go${goVersion}.linux-amd64.tar.gz
+rm /tmp/go${goVersion}.linux-amd64.tar.gz
 ```
 
-[Original documentation](https://master--kubernetes-io-master-staging.netlify.app/docs/tasks/tools/install-kubectl-linux/#install-using-native-package-management)
+[See official documentation](https://golang.org/doc/install)
 
 
 Install AWS CLI

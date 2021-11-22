@@ -320,7 +320,14 @@ alias ls='pwd; ls --color'     # Alias 'ls' to: pwd + ls + color.
 
 alias kill='sudo kill'  # promote kill to sudo kill
 alias logmass="code ~/.omw/output/1.0.0-9999-SNAPSHOT/deploy/tomcat/platform-tomcat/logs/maas"
-alias mvnmass="cd $MAAS_HOME/itsma-x; mvn install -DskipTests=true -Pgenerate-sources --builder smart -T0.8C -nsu;"
+
+
+# Original PATH from genie - Temporary fix, see https://github.com/arkane-systems/genie/issues/201
+[ -f /run/genie.path ] && export PATH=$PATH:$(cat /run/genie.path)
+
+# source /usr/sbin/start-systemd-namespace
+export SCREENDIR=$HOME/.screen
+
 
 # WSL specific things
 if grep --quiet microsoft /proc/version 2>/dev/null; then
@@ -328,12 +335,6 @@ if grep --quiet microsoft /proc/version 2>/dev/null; then
   alias wslb="PowerShell.exe 'Start-Process PowerShell -Verb RunAs \"PowerShell -File \$env:USERPROFILE\\wsl2-bridge.ps1\"'"
   alias dcs="sudo /etc/init.d/docker start"
 fi
-
-# Original PATH from genie - Temporary fix, see https://github.com/arkane-systems/genie/issues/201
-[ -f /run/genie.path ] && export PATH=$PATH:$(cat /run/genie.path)
-
-# source /usr/sbin/start-systemd-namespace
-export SCREENDIR=$HOME/.screen
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
