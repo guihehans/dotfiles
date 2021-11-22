@@ -88,6 +88,12 @@ GPG key
 
 If you already have a GPG key, restore it. If you did not have one, you can create one.
 
+### Create
+
+- `gpg --full-generate-key`
+
+[Read GitHub documentation about generating a new GPG key for more details](https://docs.github.com/en/github/authenticating-to-github/generating-a-new-gpg-key).
+
 ### Restore
 
 - On old system, create a backup of a GPG key
@@ -96,12 +102,6 @@ If you already have a GPG key, restore it. If you did not have one, you can crea
 - On new system, import the key:
   - `gpg --import /tmp/private.key`
 - Delete the `/tmp/private.key` on both side
-
-### Create
-
-- `gpg --full-generate-key`
-
-[Read GitHub documentation about generating a new GPG key for more details](https://docs.github.com/en/github/authenticating-to-github/generating-a-new-gpg-key).
 
 
 Setup Git
