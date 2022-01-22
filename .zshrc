@@ -281,6 +281,7 @@ export ZSH="/home/guihehans/.oh-my-zsh"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
 	omw
+	git
 )
 
 
@@ -315,25 +316,34 @@ source <(kubectl completion zsh)
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 cd ~
 
-alias sz='source ~/.zshrc'     # Easily source your ~/.zshrc file.
+alias sz='exec zsh'     # Easily source your ~/.zshrc file.
 alias ls='pwd; ls --color'     # Alias 'ls' to: pwd + ls + color.
 
 alias kill='sudo kill'  # promote kill to sudo kill
-alias logmass="code ~/.omw/output/1.0.0-9999-SNAPSHOT/deploy/tomcat/platform-tomcat/logs/maas"
+alias logmaas="code ~/.omw/output/1.0.0-9999-SNAPSHOT/deploy/tomcat/platform-tomcat/logs/"
+alias loggateway="code ~/.omw/output/1.0.0-9999-SNAPSHOT/deploy/tomcat/gateway-tomcat/logs/"
+alias c2s="omw build:config package:package deploy:deploy prepare:prepare start:start"
+alias kgp="kubectl get pods"
+alias kgs="kubectl get svc"
+alias kgi="kubectl get ing"
+alias kgd="kubectl get deployment"
 
+# alias ke ="kubectl exec"
+
+alias updateomw="cd $MAAS_HOME/omw; zsh ./update.sh"
 
 # Original PATH from genie - Temporary fix, see https://github.com/arkane-systems/genie/issues/201
 [ -f /run/genie.path ] && export PATH=$PATH:$(cat /run/genie.path)
 
 # source /usr/sbin/start-systemd-namespace
 export SCREENDIR=$HOME/.screen
-
+PATH=$PATH:$HOME/.local/bin
+PATH=$PATH:/usr/local/go/bin
 
 # WSL specific things
 if grep --quiet microsoft /proc/version 2>/dev/null; then
   alias idea="(pkill -f 'java.*idea' || true) && screen -d -m /opt/idea/bin/idea.sh"
   alias wslb="PowerShell.exe 'Start-Process PowerShell -Verb RunAs \"PowerShell -File \$env:USERPROFILE\\wsl2-bridge.ps1\"'"
-  alias dcs="sudo /etc/init.d/docker start"
 fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
