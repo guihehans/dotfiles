@@ -89,7 +89,7 @@ zstyle ':prezto:load' pmodule \
 	# 'autosuggestions' \
 
 # Initialize prezto
-antigen use oh-my-zsh
+antigen use prezto
 
 
 # default bundles
