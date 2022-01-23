@@ -89,7 +89,7 @@ zstyle ':prezto:load' pmodule \
 	# 'autosuggestions' \
 
 # Initialize prezto
-antigen use prezto
+antigen use oh-my-zsh
 
 
 # default bundles
@@ -97,7 +97,7 @@ antigen bundle rupa/z z.sh
 antigen bundle Vifon/deer
 antigen bundle zdharma-continuum/fast-syntax-highlighting
 antigen theme romkatv/powerlevel10k
-# antigen bundle zsh-users/zsh-autosuggestions
+antigen bundle zsh-users/zsh-autosuggestions
 
 antigen bundle willghatch/zsh-cdr
 # antigen bundle zsh-users/zaw
@@ -209,79 +209,16 @@ zstyle ':completion:*:*sh:*:' tag-order files
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
+PATH=$PATH:$HOME/.local/bin
+PATH=$PATH:/usr/local/go/bin
+
 
 # Path to your oh-my-zsh installation.
 export ZSH="/home/guihehans/.oh-my-zsh"
 
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-# ZSH_THEME="powerlevel10k/powerlevel10k"
 
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in $ZSH/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
-
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
-
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment the following line to automatically update without prompting.
-# DISABLE_UPDATE_PROMPT="true"
-
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
-
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# Caution: this setting can cause issues with multiline prompts (zsh 5.7.1 and newer seem to work)
-# See https://github.com/ohmyzsh/ohmyzsh/issues/5765
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
 plugins=(
 	omw
-	git
 )
 
 
@@ -289,62 +226,20 @@ plugins=(
 source $ZSH/oh-my-zsh.sh
 source <(kubectl completion zsh)
 
-# User configuration
+# Custom environment variables
+[ -f ~/.zshenv ] && source ~/.zshenv
 
-# export MANPATH="/usr/local/man:$MANPATH"
+# Custom aliases
+[ -f ~/.aliases.zsh ] && source ~/.aliases.zsh
 
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
 
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
 
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-cd ~
-
-alias sz='exec zsh'     # Easily source your ~/.zshrc file.
-alias ls='pwd; ls --color'     # Alias 'ls' to: pwd + ls + color.
-
-alias kill='sudo kill'  # promote kill to sudo kill
-alias logmaas="code ~/.omw/output/1.0.0-9999-SNAPSHOT/deploy/tomcat/platform-tomcat/logs/"
-alias loggateway="code ~/.omw/output/1.0.0-9999-SNAPSHOT/deploy/tomcat/gateway-tomcat/logs/"
-alias c2s="omw build:config package:package deploy:deploy prepare:prepare start:start"
-alias kgp="kubectl get pods"
-alias kgs="kubectl get svc"
-alias kgi="kubectl get ing"
-alias kgd="kubectl get deployment"
-
-# alias ke ="kubectl exec"
-
-alias updateomw="cd $MAAS_HOME/omw; zsh ./update.sh"
 
 # Original PATH from genie - Temporary fix, see https://github.com/arkane-systems/genie/issues/201
 [ -f /run/genie.path ] && export PATH=$PATH:$(cat /run/genie.path)
 
-# source /usr/sbin/start-systemd-namespace
-export SCREENDIR=$HOME/.screen
-PATH=$PATH:$HOME/.local/bin
-PATH=$PATH:/usr/local/go/bin
 
-# WSL specific things
-if grep --quiet microsoft /proc/version 2>/dev/null; then
-  alias idea="(pkill -f 'java.*idea' || true) && screen -d -m /opt/idea/bin/idea.sh"
-  alias wslb="PowerShell.exe 'Start-Process PowerShell -Verb RunAs \"PowerShell -File \$env:USERPROFILE\\wsl2-bridge.ps1\"'"
-fi
+
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

@@ -1,0 +1,21 @@
+- defaults:
+    link:
+        create: true
+        relink: true
+
+- clean: ['~', '~/.config']
+
+- link:
+    ~/.dotfiles: ''
+    ~/.zshenv:
+    ~/.aliases.zsh:
+      path: .aliases.zsh
+    ~/.p10k.zsh:
+    ~/.zshrc:
+    ~/.vimrc:
+    ~/.gitignore_global:
+      path: .gitignore_global
+
+
+- shell:
+  - [git submodule update --init --recursive, Installing submodules]
