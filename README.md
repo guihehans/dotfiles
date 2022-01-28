@@ -188,8 +188,7 @@ sudo apt install -y systemd-genie
 sudo systemctl mask systemd-remount-fs.service
 sudo systemctl mask multipathd.socket
 
-# Install custom config
-sudo ln -sf ~/code/personal/genie.ini /etc/genie.ini
+
 ```
 
 

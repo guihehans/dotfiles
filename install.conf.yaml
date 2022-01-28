@@ -8,10 +8,13 @@
 - link:
     ~/.dotfiles: ''
     ~/.zshenv:
+      force: true
     ~/.aliases.zsh:
+      force: true
       path: .aliases.zsh
     ~/.p10k.zsh:
     ~/.zshrc:
+      force: true
     ~/.vimrc:
     ~/.gitignore_global:
       path: .gitignore_global
