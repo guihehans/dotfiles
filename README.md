@@ -61,6 +61,30 @@ wsl --set-default-version 2
 
 - [Install Ubuntu from Microsoft Store](https://www.microsoft.com/fr-fr/p/ubuntu/9nblggh4msv6)
 
+Set up proxy if needed
+---------------------------
+If in corp environment, using corp proxy.
+If in in home environment, using home proxy.
+
+change your proxy in .zshenv
+
+Apt proxy is required too. 
+```
+  sudo vim /etc/apt/apt.conf.d/proxy.conf
+
+  ## in /etc/apt/apt.conf.d/proxy.conf, add following line. change accordingly.
+
+  Acquire::http::Proxy "http://user:password@proxy.server:port/";
+  Acquire::https::Proxy "http://user:password@proxy.server:port/";
+```
+
+Set up non-password input for sudo 
+---------------------------
+```
+  sudo visudo
+  # add in the end of document. guihehans is my username
+  guihehans ALL=(ALL) NOPASSWD: ALL
+```
 
 Install common dependencies
 ---------------------------
@@ -175,10 +199,16 @@ sudo dpkg -i /tmp/packages-microsoft-prod.deb
 rm -f /tmp/packages-microsoft-prod.deb
 
 # Setup Arkane Systems repository
-sudo curl -sL -o /usr/share/keyrings/wsl-transdebian.gpg https://arkane-systems.github.io/wsl-transdebian/apt/wsl-transdebian.gpg
-echo \
-  "deb [arch=amd64 signed-by=/usr/share/keyrings/wsl-transdebian.gpg] https://arkane-systems.github.io/wsl-transdebian/apt/ \
-  $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/wsl-transdebian.list > /dev/null
+sudo wget -O /etc/apt/trusted.gpg.d/wsl-transdebian.gpg https://arkane-systems.github.io/wsl-transdebian/apt/wsl-transdebian.gpg
+
+sudo chmod a+r /etc/apt/trusted.gpg.d/wsl-transdebian.gpg
+
+sudo cat << EOF > /etc/apt/sources.list.d/wsl-transdebian.list
+deb https://arkane-systems.github.io/wsl-transdebian/apt/ $(lsb_release -cs) main
+deb-src https://arkane-systems.github.io/wsl-transdebian/apt/ $(lsb_release -cs) main
+EOF
+
+sudo apt update
 
 # Install Systemd Genie
 sudo apt update
