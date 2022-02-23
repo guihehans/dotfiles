@@ -6,8 +6,7 @@ Goals of this setup
 
 - Working on Windows 10, on WSL 2 filesystem
 - Having a visually nice terminal (Windows Terminal)
-- zsh as my main shell
-- Using Docker and Docker Compose directly from zsh
+- zsh as my main shell, oh-my-zsh to manage plugin
 - Using IntelliJ IDEA directly from WSL 2
 
 
@@ -24,12 +23,6 @@ What's in this setup?
 - IDE: IntelliJ IDEA, under WSL 2, used on Windows via VcXsrv
 - WSL Bridge: allow exposing WSL 2 ports on the network
 
-
-Other guides
-------------
-
-- [GitBash with zsh](git-bash/README.md), for better git performances on Windows filesystem
-- [Server](server/README.md)
 
 
 ----------------------
@@ -66,10 +59,21 @@ Set up proxy if needed
 If in corp environment, using corp proxy.
 If in in home environment, using home proxy.
 
-change your proxy in .zshenv
+change your proxy in .bashrc
 
 Apt proxy is required too. 
 ```
+  vim ~/.bashrc
+
+  # append proxy in bottom
+  export HTTP_PROXY="http://web-proxy.sg.softwaregrp.net:8088"
+  export http_proxy=$HTTP_PROXY
+  export https_proxy=$HTTP_PROXY
+  export FTP_PROXY=$HTTP_PROXY
+  export RSYNC_PROXY=$HTTP_PROXY
+  export no_proxy=localhost,127.0.0.1,localaddress,.localdomain.com,.hpeswlab.net,mydyumserver,mydyumserver.hpswlabs.adapps.hp.com,*.hp.com,16.59.0.0,hpswlabs.adapps.hp.com:80,*.softwaregrp.net,127.0.0.1,localhost,*.hpeswlab.net,*.hp.com,kubernetes.docker.internal,192.168.65.0/28,*.swinfra.net
+
+  
   sudo vim /etc/apt/apt.conf.d/proxy.conf
 
   ## in /etc/apt/apt.conf.d/proxy.conf, add following line. change accordingly.
@@ -107,27 +111,6 @@ sudo apt update && sudo apt install -y \
 ```
 
 
-GPG key
--------
-
-If you already have a GPG key, restore it. If you did not have one, you can create one.
-
-### Create
-
-- `gpg --full-generate-key`
-
-[Read GitHub documentation about generating a new GPG key for more details](https://docs.github.com/en/github/authenticating-to-github/generating-a-new-gpg-key).
-
-### Restore
-
-- On old system, create a backup of a GPG key
-  - `gpg --list-secret-keys`
-  - `gpg --export-secret-keys {{KEY_ID}} > /tmp/private.key`
-- On new system, import the key:
-  - `gpg --import /tmp/private.key`
-- Delete the `/tmp/private.key` on both side
-
-
 Setup Git
 ---------
 
@@ -137,13 +120,11 @@ Setup Git
 # Set username and email for next commands
 email="guihehans@gmail.com"
 username="guihehans"
-gpgkeyid="8FA78E6580B1222A"
 
 # Configure Git
 git config --global user.email "${email}"
 git config --global user.name "${username}"
-git config --global user.signingkey "${gpgkeyid}"
-git config --global commit.gpgsign true
+git config --global core.autocrlf input
 git config --global core.pager /usr/bin/less
 git config --global core.excludesfile ~/.gitignore
 
@@ -161,7 +142,7 @@ cat ~/.ssh/id_rsa.pub
 - [Add the generated key to GitHub](https://github.com/settings/ssh/new)
 
 
-Setup zsh
+Setup zsh and oh-my-zsh
 ---------
 
 ```shell script
@@ -169,56 +150,19 @@ Setup zsh
 
 # Clone the dotfiles repository
 mkdir -p ~/code/personal
-git clone git@github.com:guihehans/dotfiles.git ~/code/personal
+git clone https://github.com/guihehans/dotfiles.git ~/code/personal/dotfiles/
 
-# Link custom dotfiles
-ln -sf ~/code/personal/.zshrc ~/.zshrc
-ln -sf ~/code/personal/.p10k.zsh ~/.p10k.zsh
-ln -sf ~/code/personal/.gitignore ~/.gitignore
+# use dot bot to install
+cd ~/code/personal/dotfiles
+./install
 
 # Create .screen folder used by .zshrc
 mkdir ~/.screen && chmod 700 ~/.screen
 
 # Change default shell to zsh
 chsh -s $(which zsh)
-```
-
-
-Systemd
--------
-
-Allow starting services like Docker.
-This uses [arkane-systems/genie](https://github.com/arkane-systems/genie).
-
-```shell script
-#!/bin/zsh
-
-# Setup Microsoft repository (Genie depends on .NET)
-curl -sL -o /tmp/packages-microsoft-prod.deb "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb"
-sudo dpkg -i /tmp/packages-microsoft-prod.deb
-rm -f /tmp/packages-microsoft-prod.deb
-
-# Setup Arkane Systems repository
-sudo wget -O /etc/apt/trusted.gpg.d/wsl-transdebian.gpg https://arkane-systems.github.io/wsl-transdebian/apt/wsl-transdebian.gpg
-
-sudo chmod a+r /etc/apt/trusted.gpg.d/wsl-transdebian.gpg
-
-sudo cat << EOF > /etc/apt/sources.list.d/wsl-transdebian.list
-deb https://arkane-systems.github.io/wsl-transdebian/apt/ $(lsb_release -cs) main
-deb-src https://arkane-systems.github.io/wsl-transdebian/apt/ $(lsb_release -cs) main
-EOF
-
-sudo apt update
-
-# Install Systemd Genie
-sudo apt update
-sudo apt install -y systemd-genie
-
-# Mask some unwanted services
-sudo systemctl mask systemd-remount-fs.service
-sudo systemctl mask multipathd.socket
-
-
+# install oh-my-zsh
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 ```
 
 
@@ -256,7 +200,7 @@ sudo apt update && sudo apt install -y \
     libxkbcommon0
 
 # Create install folder
-sudo mkdir /opt/idea
+sudo mkdir -p /opt/idea
 
 # Allow your user to run IDEA updates from GUI
 sudo chown $UID:$UID /opt/idea
@@ -330,7 +274,7 @@ windowsUserProfile=/mnt/c/Users/$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr 
 cp ~/code/personal/.wslconfig ${windowsUserProfile}/.wslconfig
 ```
 
-Note: You can adjust the RAM amount in `.wslconfig` file. Personally, I set it to 8 GB.
+Note: You can adjust the RAM amount in `.wslconfig` file. Personally, I set it to 32 GB.
 
 Go
 ---
@@ -348,32 +292,39 @@ rm /tmp/go${goVersion}.linux-amd64.tar.gz
 [See official documentation](https://golang.org/doc/install)
 
 
-Install AWS CLI
----------------
+Systemd
+-------
+
+Allow starting services like Docker. 
+This uses [arkane-systems/genie](https://github.com/arkane-systems/genie).
 
 ```shell script
 #!/bin/zsh
 
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install
-```
+# Setup Microsoft repository (Genie depends on .NET)
+curl -sL -o /tmp/packages-microsoft-prod.deb "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb"
+sudo dpkg -i /tmp/packages-microsoft-prod.deb
+rm -f /tmp/packages-microsoft-prod.deb
 
-[Original documentation](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html)
+# Setup Arkane Systems repository
+sudo wget -O /etc/apt/trusted.gpg.d/wsl-transdebian.gpg https://arkane-systems.github.io/wsl-transdebian/apt/wsl-transdebian.gpg
+
+sudo chmod a+r /etc/apt/trusted.gpg.d/wsl-transdebian.gpg
+
+sudo cat << EOF > /etc/apt/sources.list.d/wsl-transdebian.list
+deb https://arkane-systems.github.io/wsl-transdebian/apt/ $(lsb_release -cs) main
+deb-src https://arkane-systems.github.io/wsl-transdebian/apt/ $(lsb_release -cs) main
+EOF
+
+sudo apt update
+
+# Install Systemd Genie
+sudo apt update
+sudo apt install -y systemd-genie
+
+# Mask some unwanted services
+sudo systemctl mask systemd-remount-fs.service
+sudo systemctl mask multipathd.socket
 
 
-Setup Git Filter Repo
----------------------
-
-```shell script
-#!/bin/zsh
-
-git clone git@github.com:newren/git-filter-repo.git /tmp/git-filter-repo
-cd /tmp/git-filter-repo
-make snag_docs
-cp -a git-filter-repo $(git --exec-path)
-cp -a Documentation/man1/git-filter-repo.1 $(git --man-path)/man1
-cp -a Documentation/html/git-filter-repo.html $(git --html-path)
-cd -
-rm -rf /tmp/git-filter-repo
 ```
