@@ -152,10 +152,6 @@ Setup zsh and oh-my-zsh
 mkdir -p ~/code/personal
 git clone https://github.com/guihehans/dotfiles.git ~/code/personal/dotfiles/
 
-# use dot bot to install
-cd ~/code/personal/dotfiles
-./install
-
 # Create .screen folder used by .zshrc
 mkdir ~/.screen && chmod 700 ~/.screen
 
@@ -163,6 +159,11 @@ mkdir ~/.screen && chmod 700 ~/.screen
 chsh -s $(which zsh)
 # install oh-my-zsh
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+# use dot bot to install
+cd ~/code/personal/dotfiles
+./install
+
 ```
 
 
@@ -205,8 +206,10 @@ sudo mkdir -p /opt/idea
 # Allow your user to run IDEA updates from GUI
 sudo chown $UID:$UID /opt/idea
 
-# Download IntelliJ IDEA
-curl -L "https://download.jetbrains.com/product?code=IIU&latest&distribution=linux" | tar vxz -C /opt/idea --strip 1
+# Download IntelliJ IDEA commuunity version. change if you have extra license
+curl -L "https://download-cdn.jetbrains.com/idea/ideaIC-2021.3.2.tar.gz" | tar vxz -C /opt/idea --strip 1
+
+
 ```
 
 
@@ -222,7 +225,7 @@ Setup Windows Terminal
 windowsUserProfile=/mnt/c/Users/$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
 
 # Copy Windows Terminal settings
-cp ~/code/personal/terminal-settings.json ${windowsUserProfile}/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json
+cp ~/code/personal/dotfiles/terminal-settings.json ${windowsUserProfile}/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json
 ```
 
 
@@ -239,7 +242,7 @@ To avoid doing than manually each time I start my computer, I've made the `wslb`
 windowsUserProfile=/mnt/c/Users/$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
 
 # Get the hacky network bridge script
-cp ~/code/personal/wsl2-bridge.ps1 ${windowsUserProfile}/wsl2-bridge.ps1
+cp ~/code/personal/dotfiles/wsl2-bridge.ps1 ${windowsUserProfile}/wsl2-bridge.ps1
 ```
 
 In order to allow `wsl2-bridge.ps1` script to run, you need to update your PowerShell execution policy.
@@ -271,7 +274,7 @@ Limit WSL 2 RAM consumption
 windowsUserProfile=/mnt/c/Users/$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
 
 # Avoid too much RAM consumption
-cp ~/code/personal/.wslconfig ${windowsUserProfile}/.wslconfig
+cp ~/code/personal/dotfiles/.wslconfig ${windowsUserProfile}/.wslconfig
 ```
 
 Note: You can adjust the RAM amount in `.wslconfig` file. Personally, I set it to 32 GB.

@@ -1,4 +1,4 @@
-export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com,.hpeswlab.net,*.hp.com,*.softwaregrp.net,127.0.0.1,localhost,*.hpeswlab.net,*.hp.com,kubernetes.docker.internal,192.168.65.0/28,10.96.0.0/12,192.168.59.0/24,192.168.39.0/24,*.swinfra.net,cnhgui01.microfocus.com"
+export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com,.hpeswlab.net,*.hp.com,*.softwaregrp.net,127.0.0.1,localhost,*.hpeswlab.net,*.hp.com,kubernetes.docker.internal,*.swinfra.net"
 export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64/
 export CATALINA_HOME=/opt/apache-tomcat/
 export MAAS_HOME=$HOME/maas
