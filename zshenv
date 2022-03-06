@@ -22,7 +22,7 @@ set_http_proxy() {
   if [ -z $http_proxy ]; then 
     echo "No proxy config, environment found, connection attempt failed."
     echo "Let's setup your proxy."
-    if [[ "$(hostname)" == "cnhgui01" ]]; then 
+    if [ "$(NAME)" -ne "guihehans-desktop" ]; then
       http_proxy="$company_proxy"
       https_proxy="$company_proxy"
     else
