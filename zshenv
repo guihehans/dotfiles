@@ -1,4 +1,4 @@
-export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com,.hpeswlab.net,*.hp.com,*.softwaregrp.net,127.0.0.1,localhost,*.hpeswlab.net,*.hp.com,kubernetes.docker.internal,*.swinfra.net"
+export no_proxy="localhost,127.0.0.1,.hpeswlab.net,*.softwaregrp.net,kubernetes.docker.internal,*.swinfra.net"
 export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64/
 export CATALINA_HOME=/opt/apache-tomcat/
 export MAAS_HOME=$HOME/maas
@@ -7,6 +7,13 @@ export DISPLAY=$(awk '/nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/nu
 export LIBGL_ALWAYS_INDIRECT=1
 export SCREENDIR=$HOME/.screen
 
+hostip=$(cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }')
+httpport=10809
+socketport=10808
+PROXY_HTTP="http://${hostip}:${httpport}"
+PROXY_SOCK5="SOCKS5://${hostip}:${socketport}"
+company_proxy="http://web-proxy.sg.softwaregrp.net:8080"
+
 set_http_proxy() {
   if [ -e $HOME/.proxyrc ]; then
     . $HOME/.proxyrc
@@ -14,9 +21,15 @@ set_http_proxy() {
 
   if [ -z $http_proxy ]; then 
     echo "No proxy config, environment found, connection attempt failed."
-    echo "Let's setup a config or update your password."
-    http_proxy="http://web-proxy.sg.softwaregrp.net:8080"
-    https_proxy="http://web-proxy.sg.softwaregrp.net:8080"
+    echo "Let's setup your proxy."
+    if [[ "$(hostname)" == "cnhgui01" ]]; then 
+      http_proxy="$company_proxy"
+      https_proxy="$company_proxy"
+    else
+      http_proxy="$PROXY_HTTP"
+      https_proxy="$PROXY_HTTP"
+    fi
+
     echo "export http_proxy=$http_proxy" >> $HOME/.proxyrc
     echo "export HTTP_PROXY=$http_proxy" >> $HOME/.proxyrc
     echo "export https_proxy=$https_proxy" >> $HOME/.proxyrc
