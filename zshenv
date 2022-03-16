@@ -15,27 +15,20 @@ PROXY_SOCK5="SOCKS5://${hostip}:${socketport}"
 company_proxy="http://web-proxy.sg.softwaregrp.net:8080"
 
 set_http_proxy() {
-  if [ -e $HOME/.proxyrc ]; then
-    . $HOME/.proxyrc
-  fi  
 
-  if [ -z $http_proxy ]; then 
-    echo "No proxy config, environment found, connection attempt failed."
-    echo "Let's setup your proxy."
-    if [ "$(NAME)" -ne "guihehans-desktop" ]; then
-      http_proxy="$company_proxy"
-      https_proxy="$company_proxy"
-    else
-      http_proxy="$PROXY_HTTP"
-      https_proxy="$PROXY_HTTP"
-    fi
+  if [ "$NAME" != "guihehans-desktop" ]; then
+    http_proxy="$company_proxy"
+    https_proxy="$company_proxy"
+  else
+    http_proxy="$PROXY_HTTP"
+    https_proxy="$PROXY_HTTP"
+  fi
 
-    echo "export http_proxy=$http_proxy" >> $HOME/.proxyrc
-    echo "export HTTP_PROXY=$http_proxy" >> $HOME/.proxyrc
-    echo "export https_proxy=$https_proxy" >> $HOME/.proxyrc
-    echo "export HTTPS_PROXY=$https_proxy" >> $HOME/.proxyrc
-    . $HOME/.proxyrc
-  fi  
+  export http_proxy=$http_proxy
+  export HTTP_PROXY=$http_proxy
+  export https_proxy=$https_proxy
+  export HTTPS_PROXY=$https_proxy
+  
 }
 
 kill_http_proxy() {
