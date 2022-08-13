@@ -31,7 +31,7 @@ alias sz='exec zsh'     # Easily source your ~/.zshrc file.
 alias ls='pwd; ls --color'     # Alias 'ls' to: pwd + ls + color.
 
 # alias kill='sudo kill'  # promote kill to sudo kill
-alias logmaas="code ~/.omw/output/1.0.0-9999-SNAPSHOT/deploy/tomcat/platform-tomcat/logs/"
+alias logmaas="code ~/.omw/output/1.0.0-9999-SNAPSHOT/deploy/"
 alias loggateway="code ~/.omw/output/1.0.0-9999-SNAPSHOT/deploy/tomcat/gateway-tomcat/logs/"
 alias c2s="omw build:config package:package deploy:deploy prepare:prepare start:start"
 alias kgp="kubectl get pods"

@@ -1,0 +1,8 @@
+[includeIf "gitdir:~/code/personal/"]
+  	path = .gitconfig-personal
+[includeIf "gitdir:~/maas/"]
+  	path = .gitconfig-professional
+[includeIf "gitdir:~/code/gitlab"]
+  	path = .gitconfig-gitlab
+[core]
+	autocrlf = input

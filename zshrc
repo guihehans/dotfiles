@@ -210,7 +210,6 @@ zstyle ':completion:*:*sh:*:' tag-order files
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 PATH=$PATH:$HOME/.local/bin
-PATH=$PATH:/usr/local/go/bin
 
 
 # Path to your oh-my-zsh installation.
