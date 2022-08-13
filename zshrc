@@ -217,6 +217,8 @@ export ZSH="/home/guihehans/.oh-my-zsh"
 
 
 plugins=(
+	git
+    kubectl
 	omw
 )
 
