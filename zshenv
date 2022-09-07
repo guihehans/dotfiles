@@ -7,6 +7,7 @@ export DISPLAY=$(awk '/nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/nu
 export LIBGL_ALWAYS_INDIRECT=1
 export SCREENDIR=$HOME/.screen
 export PATH=$PATH:/usr/local/go/bin
+export MAVEN_OPTS="-Xmx4096m"
 
 hostip=$(cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }')
 httpport=10809
